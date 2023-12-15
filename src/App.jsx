@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRedoAlt, faInfoCircle, faClock } from '@fortawesome/free-solid-svg-icons';
+
+import coverImage from './assets/cover.png';
 import img1 from './assets/001.png';
 import img2 from './assets/002.png';
 import img3 from './assets/003.png';
@@ -13,21 +15,69 @@ import img9 from './assets/009.png';
 
 function App() {
     const [shuffledImages, setShuffledImages] = useState([]);
+    const [flippedCards, setFlippedCards] = useState([]);
+    const [matchedCards, setMatchedCards] = useState([]);
 
     useEffect(() => {
         let images = [img1, img2, img3, img4, img5, img6, img7, img8, img9];
         images = [...images, ...images];
 
-        images.sort(() => 0.5 - Math.random());
-        setShuffledImages(images);
+        const initializedCards = images.map((image, index) => ({
+            id: index,
+            image: image,
+            isFlipped: false
+        }));
+
+        initializedCards.sort(() => 0.5 - Math.random());
+        setShuffledImages(initializedCards);
     }, []);
 
+    const flipCard = (index) => {
+        if (flippedCards.includes(index) || matchedCards.includes(index)) {
+            return;
+        }
+
+        const newFlippedCards = [...flippedCards, index];
+
+        if (newFlippedCards.length === 2) {
+            const match = shuffledImages[newFlippedCards[0]].image === shuffledImages[newFlippedCards[1]].image;
+            
+            if (match) {
+                const newMatchedCards = [...matchedCards, ...newFlippedCards];
+                setMatchedCards(newMatchedCards);
+                setFlippedCards([]);
+            } else {
+                setTimeout(() => {
+                    setFlippedCards([]);
+                    newShuffledImages = shuffledImages.map(card => ({
+                        ...card,
+                        isFlipped: matchedCards.includes(card.id)
+                    }));
+                    setShuffledImages(newShuffledImages);
+                }, 1000);
+            }
+        } else {
+            setFlippedCards(newFlippedCards);
+        }
+
+        let newShuffledImages = shuffledImages.map((card, idx) => ({
+            ...card,
+            isFlipped: newFlippedCards.includes(idx) || matchedCards.includes(idx)
+        }));
+        setShuffledImages(newShuffledImages);
+    };
+    
     return (
         <div className="p-8 bg-yellow-300 mx-auto">
             <div className="grid grid-cols-6 gap-4">
-                {shuffledImages.map((image, index) => (
+                {shuffledImages.map((card, index) => (
                     <div key={index} className="bg-yellow-100 rounded-md p-2 flex items-center justify-center">
-                        <img src={image} alt={`Card ${index}`} />
+                        <img
+                            src={card.isFlipped ? card.image : coverImage}
+                            alt={`Card ${index}`}
+                            onClick={() => flipCard(index)}
+                            className={card.isFlipped ? '' : 'cursor-pointer'}
+                        />
                     </div>
                 ))}
             </div>
