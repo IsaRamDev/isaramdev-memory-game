@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ReactModal from 'react-modal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRedoAlt, faInfoCircle, faClock } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
 
 import coverImage from './assets/cover.png';
 import img1 from './assets/001.png';
@@ -21,14 +22,24 @@ function App() {
     const [timer, setTimer] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const [showRules, setShowRules] = useState(false);
-    const [hasWon, setHasWon] = useState(false);
 
     useEffect(() => {
         if (matchedCards.length === shuffledImages.length && matchedCards.length > 0) {
             setTimerActive(false);
-            setHasWon(true); // Establecer que el jugador ha ganado
+            setTimeout(() => {
+                Swal.fire({
+                    title: "¡Great job!",
+                    text: "¡You won!",
+                    icon: "success"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        resetGame();
+                    }
+                });
+            }, 500);
         }
     }, [matchedCards, shuffledImages.length]);
+    
 
     const toggleRules = () => {
         setShowRules(!showRules);
@@ -85,7 +96,6 @@ function App() {
         setMatchedCards([]);
         setTimer(0);
         setTimerActive(false);
-        setHasWon(false);
     };
 
     const flipCard = (index) => {
@@ -142,29 +152,50 @@ function App() {
                     </div>
                 ))}
             </div>
-            
-            {hasWon && (
-                <div className="win-message">
-                    {/* Aquí puedes colocar tu imagen o componente de victoria */}
-                    <img src="url_de_tu_imagen_de_victoria.jpg" alt="You Won!" />
-                </div>
-            )}
-               
 
             <div className="mt-4 p-4 bg-white rounded-md shadow-lg flex flex-col items-center">
                 <div className="flex mb-4">
                     <button onClick={resetGame} className="text-yellow-500 text-3xl">
                         <FontAwesomeIcon icon={faRedoAlt} />
                     </button>
-                    <button onClick={toggleRules} className="text-yellow-500 text-3xl">
+                    <button onClick={toggleRules} className="text-yellow-500 text-3xl ml-4">
                         <FontAwesomeIcon icon={faInfoCircle} />
                     </button>
                 </div>
-                <ReactModal isOpen={showRules} onRequestClose={toggleRules}>
-                <h2>Reglas del Juego</h2>
-                <p>Aquí puedes detallar las reglas de tu juego...</p>
-                <button onClick={toggleRules}>Cerrar</button>
-            </ReactModal>
+
+                <ReactModal 
+                    isOpen={showRules} 
+                    onRequestClose={toggleRules}
+                    className="bg-yellow-100 rounded-lg p-6 mx-auto my-12 shadow-lg"
+                    overlayClassName="fixed inset-0 bg-black bg-opacity-30"
+                >
+                    <h2 className="text-lg font-bold text-yellow-600 mb-4">Reglas del Juego</h2>
+                    <br></br>
+                    <p className="text-gray-700">
+                        Bienvenido al juego de memoria. Aquí están las reglas para jugar:
+                        <ul className="list-disc list-inside">
+                        <br></br>
+                            <li>El tablero consiste en una serie de cartas volteadas boca abajo.</li>
+                            <li>En cada turno, el jugador voltea dos cartas, intentando encontrar pares coincidentes.</li>
+                            <li>Si las cartas coinciden, se retiran del tablero y el jugador gana un punto.</li>
+                            <li>Si no coinciden, se vuelven a colocar boca abajo y es el turno del siguiente jugador.</li>
+                            <li>El juego continúa hasta que se hayan encontrado todos los pares.</li>
+                            <li>El objetivo es recordar la ubicación de las cartas para hacer coincidir los pares más rápidamente.</li>
+                            <li>¡El jugador que encuentre más pares es el ganador!</li>
+                        </ul>
+                        <br></br>
+                        <br></br>
+                    </p>
+                    <div className='text-right'>
+                        <button 
+                            onClick={toggleRules}
+                            className="bg-yellow-400 hover:bg-yellow-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </ReactModal>
+
                  <div className="flex items-center mb-4">
                     <div className="text-2xl text-yellow-500">
                         <FontAwesomeIcon icon={faClock} />
