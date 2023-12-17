@@ -106,15 +106,14 @@ function App() {
                 const newMatchedCards = [...matchedCards, ...flippedCards];
                 setMatchedCards(newMatchedCards);
                 setFlippedCards([]);
-                console.log("Match: ", match, flippedCards);
+                setCanFlip(true);
             } else {
                 setTimeout(() => {
-                    console.log("Match: ", match, flippedCards);
                     setFlippedCards([]);
                     setCanFlip(true);
                 }, 500);
             }
-            setCanFlip(false);
+            
         }
     }, [flippedCards, matchedCards, shuffledImages]);    
     
@@ -146,10 +145,10 @@ function App() {
     
 
     return (
-        <div className="p-8 bg-yellow-300 mx-auto">
-            <div className="grid grid-cols-6 gap-4">
+        <div className="p-8 bg-yellow-300 sm:px-60 px-5">
+            <div className="grid sm:grid-cols-6 grid-cols-3 sm:gap-4 gap-2">
                 {shuffledImages.map((card, index) => (
-                    <div key={index} className="bg-yellow-100 rounded-md p-2 flex items-center justify-center">
+                    <div key={index} className="bg-yellow-100 rounded-md m-auto sm:p-2 p-1 h-32 w-24 sm:h-40 sm:w-32 flex items-center justify-center">
                         <img
                             src={card.isFlipped ? card.image : coverImage}
                             alt={`Card ${index}`}
