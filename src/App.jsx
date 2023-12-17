@@ -22,6 +22,8 @@ function App() {
     const [timer, setTimer] = useState(0);
     const [timerActive, setTimerActive] = useState(false);
     const [showRules, setShowRules] = useState(false);
+    const [canFlip, setCanFlip] = useState(true);
+
 
     useEffect(() => {
         if (matchedCards.length === shuffledImages.length && matchedCards.length > 0) {
@@ -46,7 +48,6 @@ function App() {
     };
 
     useEffect(() => {
-        // Iniciar el temporizador
         let interval;
         if (timerActive) {
             interval = setInterval(() => {
@@ -90,7 +91,6 @@ function App() {
     }, []);
 
     const resetGame = () => {
-        // Reiniciar todos los estados a los valores iniciales
         setShuffledImages(initializeGame());
         setFlippedCards([]);
         setMatchedCards([]);
@@ -98,46 +98,53 @@ function App() {
         setTimerActive(false);
     };
 
-    const flipCard = (index) => {
-        if (flippedCards.includes(index) || matchedCards.includes(index)) {
-            // Evita voltear la misma carta de nuevo
-            return;
-        }
-
-        const newFlippedCards = [...flippedCards, index];
-
-        if (newFlippedCards.length === 2) {
-            const match = shuffledImages[newFlippedCards[0]].image === shuffledImages[newFlippedCards[1]].image;
+    useEffect(() => {
+        if (flippedCards.length === 2) {
+            const match = shuffledImages[flippedCards[0]].image === shuffledImages[flippedCards[1]].image;
             
             if (match) {
-                // Si las cartas coinciden, actualiza el estado de cartas coincidentes
-                const newMatchedCards = [...matchedCards, ...newFlippedCards];
+                const newMatchedCards = [...matchedCards, ...flippedCards];
                 setMatchedCards(newMatchedCards);
-
-                // Restablecer las cartas volteadas
                 setFlippedCards([]);
+                console.log("Match: ", match, flippedCards);
             } else {
-                // Si no coinciden, voltea las cartas boca abajo después de un retraso
                 setTimeout(() => {
+                    console.log("Match: ", match, flippedCards);
                     setFlippedCards([]);
-                }, 1000);
+                    setCanFlip(true);
+                }, 500);
             }
-        } else {
-            setFlippedCards(newFlippedCards);
+            setCanFlip(false);
         }
-
-        // Actualizar las cartas volteadas de inmediato
+    }, [flippedCards, matchedCards, shuffledImages]);    
+    
+    const flipCard = (index) => {
+        if (!canFlip || flippedCards.includes(index) || matchedCards.includes(index)) {
+            return;
+        }
+    
+        const newFlippedCards = [...flippedCards, index];
+        setFlippedCards(newFlippedCards);
+    
         let newShuffledImages = shuffledImages.map((card, idx) => ({
             ...card,
             isFlipped: newFlippedCards.includes(idx) || matchedCards.includes(idx)
         }));
         setShuffledImages(newShuffledImages);
-
+    
+        if (newFlippedCards.length === 1) {
+            setCanFlip(false);
+            setTimeout(() => {
+                setCanFlip(true);
+            }, 1000);
+        }
+    
         if (!timerActive && flippedCards.length === 0 && matchedCards.length === 0) {
             setTimerActive(true);
         }
     };
     
+
     return (
         <div className="p-8 bg-yellow-300 mx-auto">
             <div className="grid grid-cols-6 gap-4">
